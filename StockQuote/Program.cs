@@ -1,11 +1,13 @@
 ﻿
 using StockQuote.Models;
+using StockQuote.Services;
+using StockQuote.Utils;
 
 namespace StockQuote
 {
     public class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             bool isFormatted = args.Length == 3;
             if (!isFormatted)
@@ -17,14 +19,21 @@ namespace StockQuote
             string name;
             double buyPrice;
             double sellPrice;
+            Configuration configuration;
 
             try
             {
+                configuration = FileReader.ReadFile<Configuration>("./AppConfig.json");
                 name = args[0];
                 buyPrice = Double.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
                 sellPrice = Double.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
             }
-            catch (Exception)
+            catch (ConfigurationException e) 
+            {
+                Console.WriteLine(e.Message);
+                return;
+            }
+            catch (Exception e)
             {
                 Console.WriteLine("Houve um erro ao tentar formatar os valores. Tente novamente, por favor");
                 return;
@@ -32,10 +41,23 @@ namespace StockQuote
 
 
             Stock stock = new(name, buyPrice, sellPrice);
+            StockMonitoringService stockMonitoringService = new StockMonitoringService(stock, configuration.ApiKey);
 
-            Console.WriteLine(stock.Name);
-            Console.WriteLine(stock.BuyPrice);
-            Console.WriteLine(stock.SellPrice);
+            try
+            {
+                var stockValue = await stockMonitoringService.GetStockValue();
+                Console.WriteLine(stockValue.FullName);
+                Console.WriteLine(stockValue.Price);    
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("Houve um erro na API. Tente novamente, por favor. " + e.Message);
+            }
+            catch(Exception e) { 
+                Console.WriteLine("Houve um erro na interno. Tente novamente, por favor. " + e.Message);
+            }
+
+
         }
     }
 }
