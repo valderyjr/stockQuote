@@ -28,7 +28,7 @@ namespace StockQuote
                 buyPrice = Double.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
                 sellPrice = Double.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
             }
-            catch (ConfigurationException e) 
+            catch (ConfigurationException e)
             {
                 Console.WriteLine(e.Message);
                 return;
@@ -39,15 +39,15 @@ namespace StockQuote
                 return;
             }
 
-
-            Stock stock = new(name, buyPrice, sellPrice);
-            StockMonitoringService stockMonitoringService = new StockMonitoringService(stock, configuration.ApiKey);
-
             try
             {
+                Stock stock = new(name, buyPrice, sellPrice);
+                StockMonitoringService stockMonitoringService = new StockMonitoringService(stock, configuration.ApiKey);
+
                 var stockValue = await stockMonitoringService.GetStockValue();
                 stock.FullName = stockValue.FullName;
                 stock.UpdateCurentPrice(stockValue.Price);
+
                 Console.WriteLine(stock.ToString());
                 Console.WriteLine(stockMonitoringService.CalculateStockStatusEnum());
             }
@@ -55,8 +55,13 @@ namespace StockQuote
             {
                 Console.WriteLine("Houve um erro na API. Tente novamente, por favor. " + e.Message);
             }
-            catch(Exception e) { 
-                Console.WriteLine("Houve um erro na interno. Tente novamente, por favor. " + e.Message);
+            catch (ArgumentException e)
+            {
+                Console.WriteLine("Houve um erro nos dados de entrada. Tente novamente, por favor. " + e.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Houve um erro interno. Tente novamente, por favor. " + e.Message);
             }
 
 

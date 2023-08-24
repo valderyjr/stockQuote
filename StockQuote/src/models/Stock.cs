@@ -17,15 +17,32 @@ namespace StockQuote.Models
 
         public Stock(string name, double buyPrice, double sellPrice)
         {
+            int formattedBuyPrice = Convert.ToInt32(buyPrice * 100);
+            int formattedSellPrice = Convert.ToInt32(sellPrice * 100);
+
+            ValidateBuyAndSellPrices(formattedBuyPrice, formattedSellPrice);
+
             Name = name;
             BuyPrice = Convert.ToInt32(buyPrice * 100);
             SellPrice = Convert.ToInt32(sellPrice * 100);
         }
+        private void ValidateBuyAndSellPrices(int buyPrice, int sellPrice)
+        {
+            if (buyPrice <= 0 || sellPrice <= 0)
+            {
+                throw new ArgumentException("O valor de compra/venda não pode ser negativo ou igual a zero.");
+            };
 
+            if (buyPrice > sellPrice)
+            {
+                throw new ArgumentException("O valor de compra não pode ser maior que o valor de venda.");
+            };
+        }
         public void UpdateCurentPrice (double price)
         {
             Price = Convert.ToInt32(price * 100);
         }
+
 
         public override string ToString()
         {
