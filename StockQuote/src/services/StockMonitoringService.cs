@@ -57,7 +57,7 @@ namespace StockQuote.Services
             }
         }
 
-        public StockStatusEnum CalculateStockStatusEnum()
+        public StockStatusEnum CalculateStockStatus()
         {
 
             return _stock switch

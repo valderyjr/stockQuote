@@ -27,20 +27,7 @@ namespace StockQuote
                 name = args[0];
                 buyPrice = Double.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
                 sellPrice = Double.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
-            }
-            catch (ConfigurationException e)
-            {
-                Console.WriteLine(e.Message);
-                return;
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Houve um erro ao tentar formatar os valores. Tente novamente, por favor");
-                return;
-            }
 
-            try
-            {
                 Stock stock = new(name, buyPrice, sellPrice);
                 StockMonitoringService stockMonitoringService = new StockMonitoringService(stock, configuration.ApiKey);
 
@@ -49,7 +36,15 @@ namespace StockQuote
                 stock.UpdateCurentPrice(stockValue.Price);
 
                 Console.WriteLine(stock.ToString());
-                Console.WriteLine(stockMonitoringService.CalculateStockStatusEnum());
+                Console.WriteLine(stockMonitoringService.CalculateStockStatus());
+            }
+            catch (ConfigurationException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            catch (FormatException e)
+            {
+                Console.WriteLine("Houve um erro ao tentar formatar os valores. Tente novamente, por favor" + e.Message);
             }
             catch (HttpRequestException e)
             {
