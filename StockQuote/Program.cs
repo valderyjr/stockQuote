@@ -33,7 +33,7 @@ namespace StockQuote
                 Console.WriteLine(e.Message);
                 return;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("Houve um erro ao tentar formatar os valores. Tente novamente, por favor");
                 return;
@@ -46,8 +46,10 @@ namespace StockQuote
             try
             {
                 var stockValue = await stockMonitoringService.GetStockValue();
-                Console.WriteLine(stockValue.FullName);
-                Console.WriteLine(stockValue.Price);    
+                stock.FullName = stockValue.FullName;
+                stock.UpdateCurentPrice(stockValue.Price);
+                Console.WriteLine(stock.ToString());
+                Console.WriteLine(stockMonitoringService.CalculateStockStatusEnum());
             }
             catch (HttpRequestException e)
             {

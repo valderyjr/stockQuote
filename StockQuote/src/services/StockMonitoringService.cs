@@ -1,7 +1,9 @@
 ﻿using StockQuote.Models;
+using StockQuote.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -53,7 +55,18 @@ namespace StockQuote.Services
 
                 return formattedContent.Results.First();
             }
+        }
 
+        public StockStatusEnum CalculateStockStatusEnum()
+        {
+
+            return _stock switch
+            {
+                Stock _stock when _stock.Price < _stock.BuyPrice => StockStatusEnum.Buy,
+                Stock _stock when _stock.Price > _stock.SellPrice => StockStatusEnum.Sell,
+                _ => StockStatusEnum.Hold,
+
+            };
 
         }
     }
