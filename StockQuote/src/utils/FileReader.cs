@@ -23,7 +23,7 @@ namespace StockQuote.Utils
             }
             catch (Exception e)
             {
-                throw new ConfigurationException(e.Message);
+                throw new ConfigurationException(e.Message, e);
             }
 
         }
