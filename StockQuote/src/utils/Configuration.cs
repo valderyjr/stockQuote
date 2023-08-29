@@ -9,7 +9,7 @@ namespace StockQuote.Utils
         {
         }
         public ConfigurationException(string message)
-            : base("Invalid configuration. Please see the README.md file and update your configs: " + message)
+            : base("Configuração inválida. Leia o arquivo README.md e atualize as suas configurações, por favor. \n" + message)
         {
 
         }
@@ -21,5 +21,10 @@ namespace StockQuote.Utils
     }
 
     public record class Configuration(
-   [property: JsonPropertyName("apiKey")] string ApiKey);
+   [property: JsonPropertyName("apiKey")] string ApiKey,
+   [property: JsonPropertyName("mailFrom")] string MailFrom,
+   [property: JsonPropertyName("mailTo")] string MailTo,
+   [property: JsonPropertyName("smtpPort")] int SmtpPort,
+   [property: JsonPropertyName("smtpHost")] string SmtpHost,
+   [property: JsonPropertyName("smtpPassword")] string SmtpPassword);
 }

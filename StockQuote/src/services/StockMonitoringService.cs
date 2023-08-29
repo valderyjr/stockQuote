@@ -59,13 +59,11 @@ namespace StockQuote.Services
 
         public StockStatusEnum CalculateStockStatus()
         {
-
             return _stock switch
             {
                 Stock _stock when _stock.Price < _stock.BuyPrice => StockStatusEnum.Buy,
                 Stock _stock when _stock.Price > _stock.SellPrice => StockStatusEnum.Sell,
                 _ => StockStatusEnum.Hold,
-
             };
 
         }

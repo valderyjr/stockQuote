@@ -2,6 +2,7 @@
 using StockQuote.Models;
 using StockQuote.Services;
 using StockQuote.Utils;
+using System.Net.Mail;
 
 namespace StockQuote
 {
@@ -30,13 +31,26 @@ namespace StockQuote
 
                 Stock stock = new(name, buyPrice, sellPrice);
                 StockMonitoringService stockMonitoringService = new StockMonitoringService(stock, configuration.ApiKey);
+                MailSenderService mail = new MailSenderService(from: configuration.MailFrom, to: configuration.MailTo, smtpPort: configuration.SmtpPort, smtpHost: configuration.SmtpHost, smtpPassword: configuration.SmtpPassword);
 
                 var stockValue = await stockMonitoringService.GetStockValue();
                 stock.FullName = stockValue.FullName;
                 stock.UpdateCurentPrice(stockValue.Price);
 
                 Console.WriteLine(stock.ToString());
-                Console.WriteLine(stockMonitoringService.CalculateStockStatus());
+                
+                var stockStatus = stockMonitoringService.CalculateStockStatus();
+
+                if (stockStatus == StockStatusEnum.Hold)
+                {
+                    Console.WriteLine("Sugerimos que você continue mantendo esta ação.");
+                    return;
+                }
+
+                string subject = $"{stock.Name} - {stockStatus}";
+                string body = $"Email referente a ação {stock.FullName}";
+                
+                mail.SendMail(subject, body);
             }
             catch (ConfigurationException e)
             {
@@ -44,19 +58,19 @@ namespace StockQuote
             }
             catch (FormatException e)
             {
-                Console.WriteLine("Houve um erro ao tentar formatar os valores. Tente novamente, por favor" + e.Message);
+                Console.WriteLine("Houve um erro ao tentar formatar os valores. Tente novamente, por favor. \n" + e.Message);
             }
             catch (HttpRequestException e)
             {
-                Console.WriteLine("Houve um erro na API. Tente novamente, por favor. " + e.Message);
+                Console.WriteLine("Houve um erro na API. Tente novamente, por favor. \n" + e.Message);
             }
             catch (ArgumentException e)
             {
-                Console.WriteLine("Houve um erro nos dados de entrada. Tente novamente, por favor. " + e.Message);
+                Console.WriteLine("Houve um erro nos dados de entrada. Tente novamente, por favor. \n" + e.Message);
             }
             catch (Exception e)
             {
-                Console.WriteLine("Houve um erro interno. Tente novamente, por favor. " + e.Message);
+                Console.WriteLine("Houve um erro interno. Tente novamente, por favor. \n" + e.Message);
             }
 
 
