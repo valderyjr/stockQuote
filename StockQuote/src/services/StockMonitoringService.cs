@@ -67,5 +67,27 @@ namespace StockQuote.Services
             };
 
         }
+
+        public string GetFormattedMailSubject()
+        {
+
+            return $"Notificação - {_stock.Name}";
+        }
+
+        public string GetFormattedMailBody(StockStatusEnum status)
+        {
+            string formattedPrice = _stock.FormatPriceToUser();
+            string currentStatus = "";
+            if (status == StockStatusEnum.Sell)
+            {
+                currentStatus = "VENDA";
+            } else if (status == StockStatusEnum.Buy)
+            {
+                currentStatus = "COMPRA";
+            }
+
+            return $"Estamos enviando um email referente a ação {_stock.FullName}. \n" +
+                $"Com base no valor atual de R${formattedPrice}, recomendamos a ação de: {currentStatus}";
+        }
     }
 }

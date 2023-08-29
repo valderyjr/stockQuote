@@ -28,17 +28,15 @@ namespace StockQuote
                 name = args[0];
                 buyPrice = Double.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
                 sellPrice = Double.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
-
+                
+                MailSenderService mail = new MailSenderService(from: configuration.MailFrom, to: configuration.MailTo, smtpPort: configuration.SmtpPort, smtpHost: configuration.SmtpHost, smtpPassword: configuration.SmtpPassword);
                 Stock stock = new(name, buyPrice, sellPrice);
                 StockMonitoringService stockMonitoringService = new StockMonitoringService(stock, configuration.ApiKey);
-                MailSenderService mail = new MailSenderService(from: configuration.MailFrom, to: configuration.MailTo, smtpPort: configuration.SmtpPort, smtpHost: configuration.SmtpHost, smtpPassword: configuration.SmtpPassword);
 
                 var stockValue = await stockMonitoringService.GetStockValue();
                 stock.FullName = stockValue.FullName;
                 stock.UpdateCurentPrice(stockValue.Price);
 
-                Console.WriteLine(stock.ToString());
-                
                 var stockStatus = stockMonitoringService.CalculateStockStatus();
 
                 if (stockStatus == StockStatusEnum.Hold)
@@ -47,9 +45,9 @@ namespace StockQuote
                     return;
                 }
 
-                string subject = $"{stock.Name} - {stockStatus}";
-                string body = $"Email referente a ação {stock.FullName}";
-                
+                string subject = stockMonitoringService.GetFormattedMailSubject();
+                string body = stockMonitoringService.GetFormattedMailBody(stockStatus);
+
                 mail.SendMail(subject, body);
             }
             catch (ConfigurationException e)

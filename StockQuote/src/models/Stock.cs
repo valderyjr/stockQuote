@@ -38,15 +38,16 @@ namespace StockQuote.Models
                 throw new ArgumentException("O valor de compra não pode ser maior que o valor de venda.");
             };
         }
-        public void UpdateCurentPrice (double price)
+        public void UpdateCurentPrice(double price)
         {
             Price = Convert.ToInt32(price * 100);
         }
 
-
-        public override string ToString()
+        public string FormatPriceToUser()
         {
-            return $"O produto {Name} de nome {FullName} possui como seu atual valor {Price}, e valores de compra e venda: {BuyPrice} e {SellPrice}";
+            double price = Price != null ? (double)Price / 100 : 0;
+            return price.ToString("N2", System.Globalization.CultureInfo.InvariantCulture);
         }
+   
     }
 }
