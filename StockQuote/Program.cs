@@ -28,27 +28,46 @@ namespace StockQuote
                 name = args[0];
                 buyPrice = Double.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
                 sellPrice = Double.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
-                
+
                 MailSenderService mail = new MailSenderService(from: configuration.MailFrom, to: configuration.MailTo, smtpPort: configuration.SmtpPort, smtpHost: configuration.SmtpHost, smtpPassword: configuration.SmtpPassword);
                 Stock stock = new(name, buyPrice, sellPrice);
-                StockMonitoringService stockMonitoringService = new StockMonitoringService(stock, configuration.ApiKey);
 
-                var stockValue = await stockMonitoringService.GetStockValue();
-                stock.FullName = stockValue.FullName;
-                stock.UpdateCurentPrice(stockValue.Price);
-
-                var stockStatus = stockMonitoringService.CalculateStockStatus();
-
-                if (stockStatus == StockStatusEnum.Hold)
+                while (true)
                 {
-                    Console.WriteLine("Sugerimos que você continue mantendo esta ação.");
-                    return;
+                    StockMonitoringService stockMonitoringService = new StockMonitoringService(stock, configuration.ApiKey);
+
+                    var stockValue = await stockMonitoringService.GetStockValue();
+                    stock.FullName = stockValue.FullName;
+                    stock.UpdateCurentPrice(stockValue.Price);
+
+                    var stockStatus = stockMonitoringService.CalculateStockStatus();
+
+                    if (stockStatus == StockStatusEnum.Hold)
+                    {
+                        Console.WriteLine("Sugerimos que você continue mantendo esta ação.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Estamos enviando um email...");
+                        string subject = stockMonitoringService.GetFormattedMailSubject();
+                        string body = stockMonitoringService.GetFormattedMailBody(stockStatus);
+                        mail.SendMail(subject, body);
+                    }
+
+                    Console.WriteLine("Você deseja continuar monitorando esta ação? Se sim, escreva Y/y. Qualquer tecla diferente irá parar a execução do sistema.");
+
+                    var pressedKey = Console.ReadKey();
+
+                    Console.WriteLine();
+
+                    if (pressedKey.Key != ConsoleKey.Y)
+                    {
+                        Console.WriteLine("Finalizando aplicação...");
+                        break;
+                    }
+
+                    await Task.Delay(15000);
                 }
-
-                string subject = stockMonitoringService.GetFormattedMailSubject();
-                string body = stockMonitoringService.GetFormattedMailBody(stockStatus);
-
-                mail.SendMail(subject, body);
             }
             catch (ConfigurationException e)
             {
